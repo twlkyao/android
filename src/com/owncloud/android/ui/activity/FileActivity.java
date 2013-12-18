@@ -48,7 +48,7 @@ public abstract class FileActivity extends SherlockFragmentActivity {
     public static final String EXTRA_ACCOUNT = "com.owncloud.android.ui.activity.ACCOUNT";
     public static final String EXTRA_WAITING_TO_PREVIEW = "com.owncloud.android.ui.activity.WAITING_TO_PREVIEW";
     
-    public static final String TAG = FileActivity.class.getSimpleName(); 
+    public static final String TAG = FileActivity.class.getSimpleName(); // Return the name of the class.
     
     
     /** OwnCloud {@link Account} where the main {@link OCFile} handled by the activity is located. */
