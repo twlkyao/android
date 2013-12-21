@@ -21,7 +21,9 @@ package com.owncloud.android;
  * Represents a session to an ownCloud instance
  * 
  * @author Bartek Przybylski
- * 
+ * @editor Shiyao Qi
+ * @date 2013.12.21
+ * @email qishiyao2008@126.com
  */
 public class OwnCloudSession {
     private String mSessionName;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
+<!--
   ownCloud Android client application
 
   Copyright (C) 2012  Bartek Przybylski
@@ -16,25 +16,57 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- -->
+-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:orientation="vertical"
-	android:layout_width="wrap_content" android:background="#fefefe"
-	android:gravity="center">
-	<TextView android:layout_width="fill_parent" android:text="@string/uploader_top_message"
-		android:layout_height="wrap_content" android:id="@+id/textView1" android:textColor="@android:color/black"
-		android:gravity="center_horizontal"></TextView>
-	<FrameLayout android:layout_height="fill_parent"
-		android:layout_width="fill_parent" android:id="@+id/frameLayout1"
-		android:layout_below="@+id/textView1" android:layout_above="@+id/linearLayout1">
-		<ListView android:id="@android:id/list" android:layout_width="fill_parent"
-			android:layout_height="fill_parent" android:divider="@drawable/uploader_list_separator"
-			android:dividerHeight="1dip"></ListView>
-	</FrameLayout>
-	<LinearLayout android:id="@+id/linearLayout1"
-		android:layout_width="fill_parent" android:layout_alignParentBottom="true" android:layout_height="wrap_content" android:orientation="vertical">
-		<Button android:layout_gravity="bottom" android:layout_height="wrap_content"
-			android:layout_width="fill_parent" android:id="@+id/uploader_choose_folder"
-			android:text="@string/uploader_btn_upload_text"></Button>
-	</LinearLayout>
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#fefefe"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <!-- The upload directory. -->
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="@string/uploader_top_message"
+        android:textColor="@android:color/black" >
+    </TextView>
+    <!-- File listview -->
+
+    <FrameLayout
+        android:id="@+id/frameLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/linearLayout1"
+        android:layout_below="@+id/textView1" >
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:divider="@drawable/uploader_list_separator"
+            android:dividerHeight="1dip" >
+        </ListView>
+    </FrameLayout>
+    <!-- Upload button. -->
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/uploader_choose_folder"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:text="@string/uploader_btn_upload_text" >
+        </Button>
+    </LinearLayout>
+
 </RelativeLayout>

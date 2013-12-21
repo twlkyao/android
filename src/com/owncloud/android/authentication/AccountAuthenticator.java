@@ -27,12 +27,16 @@ import com.owncloud.android.Log_OC;
 /**
  *  Authenticator for ownCloud accounts.
  * 
- *  Controller class accessed from the system AccountManager, providing integration of ownCloud accounts with the Android system.
+ *  Controller class accessed from the system AccountManager,
+ *  providing integration of ownCloud accounts with the Android system.
  * 
  *  TODO - better separation in operations for OAuth-capable and regular ownCloud accounts.
  *  TODO - review completeness 
  * 
  * @author David A. Velasco
+ * @editor Shiyao Qi
+ * @date 2013.12.21
+ * @email qishiyao2008@126.com
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
     

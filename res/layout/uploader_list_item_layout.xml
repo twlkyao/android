@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
+<!--
   ownCloud Android client application
 
   Copyright (C) 2012  Bartek Przybylski
@@ -16,29 +16,31 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- -->
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:background="#fefefe"
-	android:orientation="horizontal"
-	android:layout_height="56dp"  >
-  
-    <ImageView 
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="56dp"
+    android:background="#fefefe"
+    android:orientation="horizontal" >
+
+    <!-- File icon. -->
+
+    <ImageView
+        android:id="@+id/imageView1"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_gravity="center_vertical|center"
         android:layout_margin="4dp"
-        android:src="@drawable/ic_menu_archive" 
-        android:id="@+id/imageView1" />
-    
-    <TextView 
-        android:text="TextView" 
-        android:layout_width="fill_parent" 
-        android:id="@+id/textView1" 
-        android:layout_height="wrap_content" 
+        android:src="@drawable/ic_menu_archive" />
+    <!-- File name. -->
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="TextView"
         android:textColor="@android:color/black"
-		android:layout_gravity="center_vertical"
-        android:textSize="20dip"/>
-    
+        android:textSize="20dip" />
+
 </LinearLayout>

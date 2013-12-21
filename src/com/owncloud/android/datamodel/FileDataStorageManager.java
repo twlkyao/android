@@ -41,7 +41,9 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
-
+/**
+ * 
+ */
 public class FileDataStorageManager implements DataStorageManager {
 
     private ContentResolver mContentResolver;

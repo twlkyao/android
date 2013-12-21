@@ -29,13 +29,18 @@ import java.util.Set;
  * 
  * @author Bartek Przybylski
  * @author David A. Velasco
+ * @editor Shiyao Qi
+ * @date 2013.12.21
+ * @email qishiyao2008@126.com
  */
 public class DisplayUtils {
     
     private static String TAG = DisplayUtils.class.getSimpleName(); 
     
+    // The size unit of file.
     private static final String[] sizeSuffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
+    // Map the mime type to human readable mime type.
     private static HashMap<String, String> mimeType2HUmanReadable;
     static {
         mimeType2HUmanReadable = new HashMap<String, String>();
@@ -65,8 +70,10 @@ public class DisplayUtils {
                                                         "vnd.oasis.opendocument.spreadsheet",
                                                         "vnd.oasis.opendocument.text"
                                                         };
+    // Convert the Array SUBTYPES_DOCUMENT  to a Set.
     private static Set<String> SUBTYPES_DOCUMENT_SET = new HashSet<String>(Arrays.asList(SUBTYPES_DOCUMENT));
-    private static final String[] SUBTYPES_COMPRESSED = {"x-tar", "x-gzip", "zip"};
+    private static final String[] SUBTYPES_COMPRESSED = {"x-tar", "x-gzip", "zip"}; // Compressed type.
+    // Convert the Array SUBTYPES_COMPRESSED to a Set.
     private static final Set<String> SUBTYPES_COMPRESSED_SET = new HashSet<String>(Arrays.asList(SUBTYPES_COMPRESSED));
     
     /**
@@ -78,12 +85,13 @@ public class DisplayUtils {
     public static String bytesToHumanReadable(long bytes) {
         double result = bytes;
         int attachedsuff = 0;
+        // Convert the file size by the unit in sizeSuffixes.
         while (result > 1024 && attachedsuff < sizeSuffixes.length) {
             result /= 1024.;
             attachedsuff++;
         }
-        result = ((int) (result * 100)) / 100.;
-        return result + " " + sizeSuffixes[attachedsuff];
+        result = ((int) (result * 100)) / 100.; // Convert the size to int.
+        return result + " " + sizeSuffixes[attachedsuff]; // Return the size with the unit in sizeSuffixes.
     }
 
     /**
@@ -101,7 +109,7 @@ public class DisplayUtils {
         String ret = "";
         for (int i = 0; i < s.length(); ++i) {
             if (s.charAt(i) == '%') {
-                ret += (char) Integer.parseInt(s.substring(i + 1, i + 3), 16);
+                ret += (char) Integer.parseInt(s.substring(i + 1, i + 3), 16); // Convert the chars into hex
                 i += 2;
             } else {
                 ret += s.charAt(i);
@@ -118,10 +126,10 @@ public class DisplayUtils {
      * @return A human friendly version of the MIME type
      */
     public static String convertMIMEtoPrettyPrint(String mimetype) {
-        if (mimeType2HUmanReadable.containsKey(mimetype)) {
+        if (mimeType2HUmanReadable.containsKey(mimetype)) { // Convert to human readable mime type.
             return mimeType2HUmanReadable.get(mimetype);
         }
-        if (mimetype.split("/").length >= 2)
+        if (mimetype.split("/").length >= 2) // Convert other mime type to unknow mime type.
             return mimetype.split("/")[1].toUpperCase() + " file";
         return "Unknown type";
     }
@@ -140,31 +148,31 @@ public class DisplayUtils {
             return R.drawable.ic_menu_archive;
             
         } else {
-            String [] parts = mimetype.split("/");
+            String [] parts = mimetype.split("/"); // Split the mimetype according to the "/"
             String type = parts[0];
             String subtype = (parts.length > 1) ? parts[1] : "";
             
-            if(TYPE_TXT.equals(type)) {
+            if(TYPE_TXT.equals(type)) { // Text
                 return R.drawable.file_doc;
     
-            } else if(TYPE_IMAGE.equals(type)) {
+            } else if(TYPE_IMAGE.equals(type)) { // Image
                 return R.drawable.file_image;
                 
-            } else if(TYPE_VIDEO.equals(type)) {
+            } else if(TYPE_VIDEO.equals(type)) { // Video
                 return R.drawable.file_movie;
                 
-            } else if(TYPE_AUDIO.equals(type)) {  
+            } else if(TYPE_AUDIO.equals(type)) { // Audio
                 return R.drawable.file_sound;
                 
-            } else if(TYPE_APPLICATION.equals(type)) {
+            } else if(TYPE_APPLICATION.equals(type)) { // Application
                 
-                if (SUBTYPE_PDF.equals(subtype)) {
+                if (SUBTYPE_PDF.equals(subtype)) { // Pdf
                     return R.drawable.file_pdf;
                     
-                } else if (SUBTYPES_DOCUMENT_SET.contains(subtype)) {
+                } else if (SUBTYPES_DOCUMENT_SET.contains(subtype)) { // Document
                     return R.drawable.file_doc;
 
-                } else if (SUBTYPES_COMPRESSED_SET.contains(subtype)) {
+                } else if (SUBTYPES_COMPRESSED_SET.contains(subtype)) { // Compressed type
                     return R.drawable.file_zip;
                 }
     

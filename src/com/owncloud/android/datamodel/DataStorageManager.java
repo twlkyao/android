@@ -20,7 +20,12 @@ package com.owncloud.android.datamodel;
 
 import java.util.List;
 import java.util.Vector;
-
+/**
+ * This is used to define the interface of data management.
+ * @editor Shiyao Qi
+ * @date 2013.12.21
+ * @email qishiyao2008@126.com
+ */
 public interface DataStorageManager {
 
     public static final int ROOT_PARENT_ID = 0;

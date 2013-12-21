@@ -66,68 +66,76 @@ import com.owncloud.android.R;
  * This can be used to upload things to an ownCloud instance.
  * 
  * @author Bartek Przybylski
- * 
+ * @editor Shiyao Qi
+ * @date 2013.12.21
+ * @email qishiyao2008@126.com
  */
 public class Uploader extends ListActivity implements OnItemClickListener, android.view.View.OnClickListener {
-    private static final String TAG = "ownCloudUploader";
+    private static final String TAG = "ownCloudUploader"; // Tag string.
 
-    private Account mAccount;
-    private AccountManager mAccountManager;
-    private Stack<String> mParents;
-    private ArrayList<Parcelable> mStreamsToUpload;
-    private boolean mCreateDir;
-    private String mUploadPath;
-    private DataStorageManager mStorageManager;
-    private OCFile mFile;
+    private Account mAccount; // The user account.
+    private AccountManager mAccountManager; // AccountManger.
+    private Stack<String> mParents; // To store the full file path.
+    private ArrayList<Parcelable> mStreamsToUpload; // To store the file to be uploaded.
+    private boolean mCreateDir; // Indicate whether to create a directory.
+    private String mUploadPath; // The file upload file path.
+    private DataStorageManager mStorageManager; // The DataStorageManager interface.
+    private OCFile mFile; // OCFile.
 
-    private final static int DIALOG_NO_ACCOUNT = 0;
-    private final static int DIALOG_WAITING = 1;
-    private final static int DIALOG_NO_STREAM = 2;
-    private final static int DIALOG_MULTIPLE_ACCOUNT = 3;
+    private final static int DIALOG_NO_ACCOUNT = 0; // Indicator for no account.
+    private final static int DIALOG_WAITING = 1; // Indicator for waiting.
+    private final static int DIALOG_NO_STREAM = 2; // Indicator for no stream.
+    private final static int DIALOG_MULTIPLE_ACCOUNT = 3; // Indicator for multiple account.
 
-    private final static int REQUEST_CODE_SETUP_ACCOUNT = 0;
+    private final static int REQUEST_CODE_SETUP_ACCOUNT = 0; // Request code.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getWindow().requestFeature(Window.FEATURE_NO_TITLE); // Disable the title bar.
         mParents = new Stack<String>();
         mParents.add("");
-        if (prepareStreamsToUpload()) {
+        if (prepareStreamsToUpload()) { // The preparation is ready.
             mAccountManager = (AccountManager) getSystemService(Context.ACCOUNT_SERVICE);
             Account[] accounts = mAccountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
-            if (accounts.length == 0) {
+            if (accounts.length == 0) { // There are no accounts.
                 Log_OC.i(TAG, "No ownCloud account is available");
-                showDialog(DIALOG_NO_ACCOUNT);
-            } else if (accounts.length > 1) {
+                showDialog(DIALOG_NO_ACCOUNT); 
+            } else if (accounts.length > 1) { // There are more than one account.
                 Log_OC.i(TAG, "More then one ownCloud is available");
                 showDialog(DIALOG_MULTIPLE_ACCOUNT);
-            } else {
-                mAccount = accounts[0];
+            } else { // There is only one account.
+                mAccount = accounts[0]; // Initialize the mAccount.
                 mStorageManager = new FileDataStorageManager(mAccount, getContentResolver());
-                populateDirectoryList();
+                // Call the function to show all the file directorys under the constructed full file path.
+                populateDirectoryList(); 
             }
         } else {
             showDialog(DIALOG_NO_STREAM);
         }
     }
     
+    /**
+     * Construct different dialog according to the id.
+     */
     @Override
     protected Dialog onCreateDialog(final int id) {
         final AlertDialog.Builder builder = new Builder(this);
         switch (id) {
-        case DIALOG_WAITING:
+        case DIALOG_WAITING: // The file is uploading.
             ProgressDialog pDialog = new ProgressDialog(this);
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
             pDialog.setMessage(getResources().getString(R.string.uploader_info_uploading));
             return pDialog;
-        case DIALOG_NO_ACCOUNT:
+        case DIALOG_NO_ACCOUNT: // There are no account, then setup an account.
             builder.setIcon(android.R.drawable.ic_dialog_alert);
             builder.setTitle(R.string.uploader_wrn_no_account_title);
-            builder.setMessage(String.format(getString(R.string.uploader_wrn_no_account_text), getString(R.string.app_name)));
+            builder.setMessage(String.format(getString(R.string.uploader_wrn_no_account_text),
+                    getString(R.string.app_name)));
             builder.setCancelable(false);
             builder.setPositiveButton(R.string.uploader_wrn_no_account_setup_btn_text, new OnClickListener() {
+            
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ECLAIR_MR1) {
@@ -138,8 +146,8 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                         // and Settings.EXTRA_AUTHORITIES
                         Intent intent = new Intent(android.provider.Settings.ACTION_ADD_ACCOUNT);
                         intent.putExtra("authorities", new String[] { AccountAuthenticator.AUTHORITY });
-                        startActivityForResult(intent, REQUEST_CODE_SETUP_ACCOUNT);
-                    } else {
+                        startActivityForResult(intent, REQUEST_CODE_SETUP_ACCOUNT); // Start activity with request code.
+                    } else { // If the API level is not higher than 7, use self-defined AccountAuthenticaotor.
                         // since in API7 there is no direct call for
                         // account setup, so we need to
                         // show our own AccountSetupAcricity, get
@@ -157,18 +165,20 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                 }
             });
             return builder.create();
-        case DIALOG_MULTIPLE_ACCOUNT:
+        case DIALOG_MULTIPLE_ACCOUNT: // There are multimple accounts.
             CharSequence ac[] = new CharSequence[mAccountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE).length];
-            for (int i = 0; i < ac.length; ++i) {
+            for (int i = 0; i < ac.length; ++i) { // Fill in the array with the account name.
                 ac[i] = mAccountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE)[i].name;
             }
             builder.setTitle(R.string.common_choose_account);
-            builder.setItems(ac, new OnClickListener() {
+            builder.setItems(ac, new OnClickListener() { // Display all the available accounts.
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    // Get the clicked account.
                     mAccount = mAccountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE)[which];
+                    // Pass the account to the FileDataStorageManager.
                     mStorageManager = new FileDataStorageManager(mAccount, getContentResolver());
-                    populateDirectoryList();
+                    populateDirectoryList(); // Call the function to display the file folders under the constructed full file path.
                 }
             });
             builder.setCancelable(true);
@@ -180,7 +190,7 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                 }
             });
             return builder.create();
-        case DIALOG_NO_STREAM:
+        case DIALOG_NO_STREAM: // There are no content to upload.
             builder.setIcon(android.R.drawable.ic_dialog_alert);
             builder.setTitle(R.string.uploader_wrn_no_content_title);
             builder.setMessage(R.string.uploader_wrn_no_content_text);
@@ -197,9 +207,12 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
         }
     }
 
+    /**
+     * Implement the OnClickListener for the full file path.
+     */
     class a implements OnClickListener {
-        String mPath;
-        EditText mDirname;
+        String mPath; // Full file path.
+        EditText mDirname; // The current file directory EditText.
 
         public a(String path, EditText dirname) {
             mPath = path; 
@@ -208,60 +221,80 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            Uploader.this.mUploadPath = mPath + mDirname.getText().toString();
+            Uploader.this.mUploadPath = mPath + mDirname.getText().toString(); // Construct the full upload file path.
             Uploader.this.mCreateDir = true;
-            uploadFiles();
+            uploadFiles(); // Call the function to upload file.
         }
     }
 
+    /**
+     * Back up to the parent directory if the mParents
+     * contains more than one elements or exit when there
+     * are no more than one element.
+     */
     @Override
     public void onBackPressed() {
 
-        if (mParents.size() <= 1) {
+        if (mParents.size() <= 1) { // Finish the activity.
             super.onBackPressed();
             return;
         } else {
-            mParents.pop();
-            populateDirectoryList();
+            mParents.pop(); // Pop the last directory
+            populateDirectoryList(); // Refresh the file directory list.
         }
     }
 
+    /**
+     * Implement the file directory listview onItemClick().
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // click on folder in the list
+        // Click on folder in the list
         Log_OC.d(TAG, "on item click");
         Vector<OCFile> tmpfiles = mStorageManager.getDirectoryContent(mFile);
-        if (tmpfiles.size() <= 0) return;
+        if (tmpfiles.size() <= 0) // There are no file directory.
+            return;
         // filter on dirtype
         Vector<OCFile> files = new Vector<OCFile>();
-        for (OCFile f : tmpfiles)
+        for (OCFile f : tmpfiles) { // Add all the file directory to the Vector files.
             if (f.isDirectory())
                 files.add(f);
+        }
+           
         if (files.size() < position) {
             throw new IndexOutOfBoundsException("Incorrect item selected");
         }
-        mParents.push(files.get(position).getFileName());
-        populateDirectoryList();
+        mParents.push(files.get(position).getFileName()); // Add the file directory name to the mParents.
+        populateDirectoryList(); // Refresh the file directory list.
     }
 
+    /**
+     * Implement the onClick() for the upload button.
+     */
     @Override
     public void onClick(View v) {
         // click on button
         switch (v.getId()) {
         case R.id.uploader_choose_folder:
-            mUploadPath = "";   // first element in mParents is root dir, represented by ""; init mUploadPath with "/" results in a "//" prefix
-            for (String p : mParents)
+            /** 
+             * First element in mParents is root dir,
+             * represented by ""; init mUploadPath with "/" results in a "//" prefix
+             */
+            mUploadPath = "";
+            for (String p : mParents) // Construct the full file directory.
                 mUploadPath += p + OCFile.PATH_SEPARATOR;
             Log_OC.d(TAG, "Uploading file to dir " + mUploadPath);
 
-            uploadFiles();
-
+            uploadFiles(); // Call the function to upload file.
             break;
         default:
             throw new IllegalArgumentException("Wrong element clicked");
         }
     }
 
+    /**
+     * Do something according to the activity result.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -272,66 +305,78 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                 finish();
             }
             Account[] accounts = mAccountManager.getAccountsByType(AccountAuthenticator.AUTH_TOKEN_TYPE);
-            if (accounts.length == 0) {
+            if (accounts.length == 0) { // There are no accounts.
                 showDialog(DIALOG_NO_ACCOUNT);
             } else {
-                // there is no need for checking for is there more then one
-                // account at this point
-                // since account setup can set only one account at time
-                mAccount = accounts[0];
-                populateDirectoryList();
+                // there is no need for checking for is there more than one
+                // account at this point, since account setup can set only one account at time
+                mAccount = accounts[0]; // Get the account.
+                populateDirectoryList(); // Refresh the file directory list.
             }
         }
     }
 
+    /**
+     * Get the file directory under the constructed full file path.
+     */
     private void populateDirectoryList() {
         setContentView(R.layout.uploader_layout);
 
-        String full_path = "";
-        for (String a : mParents)
+        String full_path = ""; // The filepath.
+        for (String a : mParents) // Construct the full file path.
             full_path += a + "/";
         
         Log_OC.d(TAG, "Populating view with content of : " + full_path);
         
-        mFile = mStorageManager.getFileByPath(full_path);
+        mFile = mStorageManager.getFileByPath(full_path); // Call the function to get file.
         if (mFile != null) {
-            Vector<OCFile> files = mStorageManager.getDirectoryContent(mFile);
+            Vector<OCFile> files = mStorageManager.getDirectoryContent(mFile); // 
             List<HashMap<String, Object>> data = new LinkedList<HashMap<String,Object>>();
-            for (OCFile f : files) {
+            for (OCFile f : files) { // Add all the file directory into the List data.
                 HashMap<String, Object> h = new HashMap<String, Object>();
                 if (f.isDirectory()) {
-                    h.put("dirname", f.getFileName());
+                    h.put("dirname", f.getFileName()); // Map the file directory name with dirname.
                     data.add(h);
                 }
             }
-            SimpleAdapter sa = new SimpleAdapter(this,
-                                                data,
-                                                R.layout.uploader_list_item_layout,
-                                                new String[] {"dirname"},
-                                                new int[] {R.id.textView1});
+            SimpleAdapter sa = new SimpleAdapter(this,data,
+                    R.layout.uploader_list_item_layout,
+                    new String[] {"dirname"},
+                    new int[] {R.id.textView1});
+            
             setListAdapter(sa);
+            /**
+             * Find the upload button and set listener.
+             */
             Button btn = (Button) findViewById(R.id.uploader_choose_folder);
             btn.setOnClickListener(this);
             getListView().setOnItemClickListener(this);
         }
     }
 
+    /**
+     * According to the intent add the parcelable data to mStreamsToUpload.
+     * @return The upload status.
+     */
     private boolean prepareStreamsToUpload() {
-        if (getIntent().getAction().equals(Intent.ACTION_SEND)) {
+        if (getIntent().getAction().equals(Intent.ACTION_SEND)) { // Upload file.
             mStreamsToUpload = new ArrayList<Parcelable>();
-            mStreamsToUpload.add(getIntent().getParcelableExtra(Intent.EXTRA_STREAM));
-        } else if (getIntent().getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
-            mStreamsToUpload = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            mStreamsToUpload.add(getIntent().getParcelableExtra(Intent.EXTRA_STREAM)); // Add the parcelable data to mStreamsToUpload.
+        } else if (getIntent().getAction().equals(Intent.ACTION_SEND_MULTIPLE)) { // Upload multiple files.
+            mStreamsToUpload = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM); // Add the parcelable data to mStreamsToUpload.
         }
         return (mStreamsToUpload != null && mStreamsToUpload.get(0) != null);
     }
 
+    /**
+     * Upload file to the cloud.
+     */
     public void uploadFiles() {
         try {
             //WebdavClient webdav = OwnCloudClientUtils.createOwnCloudClient(mAccount, getApplicationContext());
 
-            ArrayList<String> local = new ArrayList<String>();
-            ArrayList<String> remote = new ArrayList<String>();
+            ArrayList<String> local = new ArrayList<String>(); // Local file.
+            ArrayList<String> remote = new ArrayList<String>(); // Remote file.
             
             /* TODO - mCreateDir can never be true at this moment; we will replace wdc.createDirectory by CreateFolderOperation when that is fixed 
             WebdavClient wdc = OwnCloudClientUtils.createOwnCloudClient(mAccount, getApplicationContext());
@@ -342,25 +387,22 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
             */
             
             // this checks the mimeType 
-            for (Parcelable mStream : mStreamsToUpload) {
+            for (Parcelable mStream : mStreamsToUpload) { // All Parcelable in mStreamToUpload.
                 
-                Uri uri = (Uri) mStream;
+                Uri uri = (Uri) mStream; // 
                 if (uri !=null) {
-                    if (uri.getScheme().equals("content")) {
+                    if (uri.getScheme().equals("content")) { // The scheme of the uri is content.
                         
-                       String mimeType = getContentResolver().getType(uri);
-                       
-                       if (mimeType.contains("image")) {
-                           String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE};
-                           Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
-                           c.moveToFirst();
-                           int index = c.getColumnIndex(Images.Media.DATA);
-                           String data = c.getString(index);
-                           local.add(data);
-                           remote.add(mUploadPath + c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)));
-                       
-                       }
-                       else if (mimeType.contains("video")) {
+                        String mimeType = getContentResolver().getType(uri); // Get the mime type of the uri.
+                        if (mimeType.contains("image")) { // Image.
+                            String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE};
+                            Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
+                            c.moveToFirst();
+                            int index = c.getColumnIndex(Images.Media.DATA);
+                            String data = c.getString(index);
+                            local.add(data); // Local add the data.
+                            remote.add(mUploadPath + c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME))); // Remote add the full file directroy path.
+                       } else if (mimeType.contains("video")) { // Video.
                            String[] CONTENT_PROJECTION = { Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE, Video.Media.DATE_MODIFIED };
                            Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
                            c.moveToFirst();
@@ -368,9 +410,7 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                            String data = c.getString(index);
                            local.add(data);
                            remote.add(mUploadPath + c.getString(c.getColumnIndex(Video.Media.DISPLAY_NAME)));
-                          
-                       }
-                       else if (mimeType.contains("audio")) {
+                       } else if (mimeType.contains("audio")) { // Audio.
                            String[] CONTENT_PROJECTION = { Audio.Media.DATA, Audio.Media.DISPLAY_NAME, Audio.Media.MIME_TYPE, Audio.Media.SIZE };
                            Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null);
                            c.moveToFirst();
@@ -378,9 +418,7 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                            String data = c.getString(index);
                            local.add(data);
                            remote.add(mUploadPath + c.getString(c.getColumnIndex(Audio.Media.DISPLAY_NAME)));
-                        
-                       }
-                       else {
+                       } else { // Other content mime type.
                            String filePath = Uri.decode(uri.toString()).replace(uri.getScheme() + "://", "");
                            // cut everything whats before mnt. It occured to me that sometimes apps send their name into the URI
                            if (filePath.contains("mnt")) {
@@ -388,11 +426,10 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                               filePath = splitedFilePath[1];
                            }
                            final File file = new File(filePath);
-                           local.add(file.getAbsolutePath());
-                           remote.add(mUploadPath + file.getName());
+                           local.add(file.getAbsolutePath()); // Local add the data.
+                           remote.add(mUploadPath + file.getName()); // Remote add the full file directroy path.
                        }
-                        
-                    } else if (uri.getScheme().equals("file")) {
+                    } else if (uri.getScheme().equals("file")) { // File.
                         String filePath = Uri.decode(uri.toString()).replace(uri.getScheme() + "://", "");
                         if (filePath.contains("mnt")) {
                            String splitedFilePath[] = filePath.split("/mnt");
@@ -401,15 +438,16 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
                         final File file = new File(filePath);
                         local.add(file.getAbsolutePath());
                         remote.add(mUploadPath + file.getName());
-                    }
-                    else {
+                    } else { // Other type.
                         throw new SecurityException();
                     }
-                }
-                else {
+                } else { // Uri is null.
                     throw new SecurityException();
-                }
+            }
            
+            /**
+             * Start the file upload service.
+             */
             Intent intent = new Intent(getApplicationContext(), FileUploader.class);
             intent.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_MULTIPLE_FILES);
             intent.putExtra(FileUploader.KEY_LOCAL_FILE, local.toArray(new String[local.size()]));
@@ -420,9 +458,9 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
             }
             
         } catch (SecurityException e) {
-            String message = String.format(getString(R.string.uploader_error_forbidden_content), getString(R.string.app_name));
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();            
+            String message = String.format(getString(R.string.uploader_error_forbidden_content),
+                    getString(R.string.app_name));
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
-
 }

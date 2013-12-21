@@ -38,7 +38,7 @@ import com.owncloud.android.datamodel.OCFile;
 import eu.alefzero.webdav.WebdavUtils;
 
 /**
- * Activity with common behaviour for activities handling {@link OCFile}s in ownCloud {@link Account}s .
+ * Activity with common behavior for activities handling {@link OCFile}s in ownCloud {@link Account}s .
  * 
  * @author David A. Velasco
  */
@@ -99,7 +99,8 @@ public abstract class FileActivity extends SherlockFragmentActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        boolean validAccount = (mAccount != null && AccountUtils.setCurrentOwnCloudAccount(getApplicationContext(), mAccount.name));
+        boolean validAccount = (mAccount != null 
+                && AccountUtils.setCurrentOwnCloudAccount(getApplicationContext(), mAccount.name));
         if (!validAccount) {
             swapToDefaultAccount();
         }
@@ -128,7 +129,8 @@ public abstract class FileActivity extends SherlockFragmentActivity {
      */
     private void setAccount(Account account, boolean savedAccount) {
         Account oldAccount = mAccount;
-        boolean validAccount = (account != null && AccountUtils.setCurrentOwnCloudAccount(getApplicationContext(), account.name));
+        boolean validAccount = (account != null 
+                && AccountUtils.setCurrentOwnCloudAccount(getApplicationContext(), account.name));
         if (validAccount) {
             mAccount = account;
             mAccountWasSet = true;
